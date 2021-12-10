@@ -1,25 +1,45 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import {
+  RecoilRoot,
+  selector,
+  useRecoilValue,
+  atom
+} from 'recoil';
+
+import { client } from './api/client'
+
+const currentUserIDState = atom({
+  key: 'CurrentUserID',
+  default: 1,
+});
+
+const currentUserNameQuery = selector({
+  key: 'CurrentUserName',
+  get: async ({ get }) => {
+    const response = await myDBQuery({
+      userID: get(currentUserIDState),
+    });
+    return response.name;
+  },
+});
+
+function CurrentUserInfo() {
+  const userName = useRecoilValue(currentUserNameQuery);
+  return <div>{userName}</div>;
+}
+
+async function myDBQuery(req: { userID: number }): Promise<{ name: string }> {
+  const res = await client.get('/fakeApi/user')
+  return { name: res.data }
+}
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <RecoilRoot>
+      <React.Suspense fallback={<div>Loading...</div>}>
+        <CurrentUserInfo />
+      </React.Suspense>
+    </RecoilRoot>
   );
 }
 
