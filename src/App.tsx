@@ -30,7 +30,7 @@ function CurrentUserInfo() {
 
 async function myDBQuery(req: { userID: number }): Promise<{ name: string }> {
   const res = await client.get('/fakeApi/user')
-  return { name: res.data }
+  return res.data
 }
 
 function App() {
